@@ -1,0 +1,28 @@
+# =====================
+# Monorepo Ignore Rules
+# =====================
+
+# Node modules
+go_eatF/node_modules/
+go_eatB/node_modules/
+
+# Environment files
+go_eatF/.env
+go_eatB/.env
+*.env
+.env.local
+
+# Build output
+go_eatF/dist/
+go_eatB/dist/
+
+# Logs
+*.log
+
+# Uploads (optional)
+go_eatB/uploads/
+
+# IDE files
+.vscode/
+.idea/
+.DS_Store
