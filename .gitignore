@@ -26,3 +26,6 @@ go_eatB/uploads/
 .vscode/
 .idea/
 .DS_Store
+
+#txt.file
+go_eat_schema.txt
