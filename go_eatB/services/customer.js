@@ -1,9 +1,9 @@
 const customerModel = require("../models/customer");
 
 function validateCustomer(customerId, callback) {
-  console.log("service", customerId);
+  //console.log("service", customerId);
   customerModel.findByCustomerId(customerId, function (err, customer) {
-    console.log(customer);
+    //console.log(customer);
     if (err) {
       return callback(err);
     }

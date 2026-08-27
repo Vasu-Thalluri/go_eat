@@ -1,7 +1,7 @@
 const db = require("../config/db");
 
 function findByCustomerId(customerId, callback) {
-  console.log("db", customerId);
+  //console.log("db", customerId);
   const query = `select * from customers where customer_id = ?`;
 
   db.query(query, [customerId], function (err, result) {

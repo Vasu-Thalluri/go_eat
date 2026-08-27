@@ -1,7 +1,7 @@
 const restaurantModel = require("../models/restaurant");
 
 function validateRestaurant(restaurantId, callback) {
-  console.log(restaurantId);
+  //console.log(restaurantId);
   restaurantModel.restaurantById(restaurantId, function (err, restaurant) {
     // console.log(err);
     if (err) {
