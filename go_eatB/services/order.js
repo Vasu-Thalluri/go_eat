@@ -1,8 +1,10 @@
-const orderModel = require("../models/order");
 const customerService = require("../services/customer");
 const restaurantService = require("../services/restaurant");
 const menuItemService = require("../services/menuItems");
 const inventoryService = require("../services/inventory");
+const orderModel = require("../models/order");
+const orderItemsModel = require("../models/order");
+const paymentModel = require("../models/order");
 
 function validateOrder(
   customer_id,
@@ -41,6 +43,7 @@ function validateOrder(
                 const inventoryItem = inventory.find((inv) => {
                   return inv.menuItemId === menuItem.menuItemId;
                 });
+                //console.log(orderItems);
                 return {
                   menuItemId: menuItem.menuItemId,
                   itemName: menuItem.itemName,
@@ -49,18 +52,66 @@ function validateOrder(
                   avlQuantity: inventoryItem.avlQuantity,
                 };
               });
-              //console.log(orderItems);
               calculateBill(orderItems, function (err, total) {
                 if (err) {
                   return callback(err);
                 }
-                return callback(null, {
-                  customer: customer.name,
-                  restaurant: restaurant.name,
-                  orderItems: orderItems,
-                  total: total,
-                  paymentMethod: paymentMethod,
-                });
+                // console.log("total price of placed items", total)
+                orderModel.placeOrder(
+                  customer.customer_id,
+                  restaurant.restaurant_id,
+                  total,
+                  function (err, order) {
+                    //console.log("Error while inserting order", err);
+                    if (err) {
+                      return callback(err);
+                    }
+                    //console.log("orderCreated.....", order);
+                    let completedCount = 0;
+                    const orderItemIDs = [];
+                    orderItems.forEach((item, index) => {
+                      orderItemsModel.createOrderItems(
+                        order.insertId,
+                        item,
+                        function (err, orderItem) {
+                          // console.log("Error while inserting orderItem", err)
+                          if (err) {
+                            return callback(err);
+                          }
+                          //console.log("orderItemCreated.....", orderItem);
+                          orderItemIDs[index] = {
+                            orderItemId: orderItem.insertId,
+                          };
+                          //console.log("insertedOrderItemIDs.....", orderItemIDs);
+                          completedCount++;
+                          if (completedCount === orderItems.length) {
+                            paymentModel.payments(
+                              order.insertId,
+                              paymentMethod,
+                              function (err, payment) {
+                                // console.log("Error while inserting orderItem", err)
+                                if (err) {
+                                  return callback(err);
+                                }
+                                //console.log("paymentCreated.....", payment);
+                                return callback(null, {
+                                  customer: customer.name,
+                                  restaurant: restaurant.name,
+                                  orderItems: orderItems,
+                                  total: total,
+                                  paymentMethod: paymentMethod,
+                                  orderId: order.insertId,
+                                  orderItemId: orderItemIDs,
+                                  paymentId: payment.insertId,
+                                });
+                              },
+                            );
+                          }
+                        },
+                      );
+                    });
+                  },
+                );
               });
             },
           );
@@ -71,6 +122,7 @@ function validateOrder(
 }
 
 function calculateBill(orderItems, callback) {
+  // console.log("orderItems...", orderItems);
   let total = 0;
   orderItems.forEach((element) => {
     total += element.price * element.quantity;

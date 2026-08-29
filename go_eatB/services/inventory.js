@@ -24,7 +24,7 @@ function inventoryValidation(items, callback) {
         reqQuantity: JSON.parse(item.quantity),
         avlQuantity: inventory.quantity,
       };
-      console.log(validatedInventory);
+      //console.log(validatedInventory);
       completedCount++;
       if (completedCount === items.length) {
         return callback(null, validatedInventory);
